@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  /* Navy Blue Theme Palette */
+  --color-navy-deep: #2C3E50;
+  /* Primary dark navy for sidebar/header */
+  --color-navy-medium: #34495E;
+  /* Secondary navy for hover states */
+  --color-navy-light: #4A5F7F;
+  /* Lighter navy for subtle backgrounds */
+  --color-accent-blue: #5DADE2;
+  /* Bright blue for buttons and highlights */
+  --color-bg-light: #ECF0F1;
+  /* Light gray for page backgrounds */
+  --color-card-white: #FFFFFF;
+  /* Clean white for cards */
+
+  /* Text Colors */
+  --color-text-dark: #2C3E50;
+  /* Primary text */
+  --color-text-medium: #7F8C8D;
+  /* Secondary text/labels */
+
+  /* Supporting Colors */
+  --color-success: #27AE60;
+  /* Positive actions */
+  --color-warning: #F39C12;
+  /* Warnings */
+  --color-error: #E74C3C;
+  /* Errors */
+}
+
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #ECF0F1;
+  font-size: 13.5px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  min-height: 100vh;
+  background-color: #ECF0F1;
+}
+
+#root {
+  height: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+/* Prevent auto-zoom on mobile focus */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
