@@ -106,7 +106,8 @@ export default function ReportsPage() {
     const filteredSalesData = useMemo(() => {
         if (!salesData) return null;
         let filteredSales = salesData.sales.filter(s => {
-            const cashierMatch = selectedCashier === 'ALL' || s.userId === selectedCashier;
+            // Match by username if filter is active, to consolidate re-created accounts
+            const cashierMatch = selectedCashier === 'ALL' || s.username === selectedCashier || s.userId === selectedCashier;
             const facebookMatch = facebookFilter === 'ALL' ||
                 (facebookFilter === 'FACEBOOK' && s.isFacebookSale) ||
                 (facebookFilter === 'REGULAR' && !s.isFacebookSale);
@@ -146,28 +147,42 @@ export default function ReportsPage() {
         const stats = {};
 
         // Initialize with all users to show those with zero sales too
+        // Group by username to consolidate re-created accounts
         cashiers.forEach(user => {
-            stats[user.uid] = {
-                uid: user.uid,
-                name: user.displayName || user.username || 'Usuario',
-                role: user.role || 'Cajero',
-                salesCount: 0,
-                totalBs: 0,
-                totalUsd: 0,
-                totalDiscount: 0,
-                totalCost: 0,
-                grossProfit: 0
-            };
+            const nameKey = user.username;
+            if (!stats[nameKey]) {
+                stats[nameKey] = {
+                    uid: user.uid, // Keep latest UID for reference
+                    name: user.displayName || user.username || 'Usuario',
+                    username: user.username,
+                    role: user.role || 'Cajero',
+                    salesCount: 0,
+                    totalBs: 0,
+                    totalUsd: 0,
+                    totalDiscount: 0,
+                    totalCost: 0,
+                    grossProfit: 0
+                };
+            }
         });
 
         const activeSales = salesData.sales.filter(s => s.status !== 'void');
 
         activeSales.forEach(sale => {
-            const uid = sale.userId;
-            if (!stats[uid]) {
-                stats[uid] = {
-                    uid: uid,
+            // Find user in stats by username if available in sale record
+            // Legacy sales might not have 'username' saved at root, check POSPage save logic
+            // Note: In saleService.js, only sellerName and userId were saved.
+            // But we can check if sellerName matches or if userId matches 
+            // Better: use username mapping or rely on sellerName if it's the identifier.
+
+            // Let's check for username in sale record first
+            const nameKey = sale.username || sale.sellerName?.replace(' (Admin)', '') || 'Desconocido';
+
+            if (!stats[nameKey]) {
+                stats[nameKey] = {
+                    uid: sale.userId,
                     name: sale.sellerName || 'Desconocido',
+                    username: nameKey,
                     role: 'N/A',
                     salesCount: 0,
                     totalBs: 0,
@@ -178,11 +193,11 @@ export default function ReportsPage() {
                 };
             }
 
-            stats[uid].salesCount += 1;
-            stats[uid].totalBs += (sale.totalBs || 0);
-            stats[uid].totalUsd += (sale.totalUsd || 0);
-            stats[uid].totalDiscount += (sale.discountBs || 0);
-            stats[uid].totalCost += (sale.totalCost || 0);
+            stats[nameKey].salesCount += 1;
+            stats[nameKey].totalBs += (sale.totalBs || 0);
+            stats[nameKey].totalUsd += (sale.totalUsd || 0);
+            stats[nameKey].totalDiscount += (sale.discountBs || 0);
+            stats[nameKey].totalCost += (sale.totalCost || 0);
         });
 
         return Object.values(stats).map(u => ({
@@ -239,7 +254,7 @@ export default function ReportsPage() {
                                 >
                                     <option value="ALL">Todo el Personal</option>
                                     {cashiers.map(user => (
-                                        <option key={user.uid} value={user.uid}>
+                                        <option key={user.uid} value={user.username}>
                                             {user.displayName || user.username || user.email}
                                         </option>
                                     ))}

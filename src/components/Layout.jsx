@@ -13,7 +13,8 @@ import {
   AlertCircle,
   HelpCircle,
   Tag,
-  Key
+  Key,
+  Shield
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -80,9 +81,18 @@ export default function Layout({ children }) {
   ];
 
   // Filter menu items based on user role
-  const navigation = userProfile?.role
+  let navigation = userProfile?.role
     ? allMenuItems.filter(item => item.roles.includes(userProfile.role))
     : allMenuItems;
+
+  // Strict check for "admin" username to show Super User module
+  // Check for both simple 'admin' and full email format which might be stored in legacy profiles
+  const isSuperUser = userProfile?.username?.toLowerCase() === 'admin' ||
+    userProfile?.username?.toLowerCase() === 'admin@sistema.local';
+
+  if (isSuperUser) {
+    navigation.push({ name: 'Súper Usuario', href: '/superuser', icon: Shield, roles: ['admin'] });
+  }
 
   return (
     <div className="h-full min-h-screen bg-[#ECF0F1] flex overflow-hidden">
@@ -147,6 +157,7 @@ export default function Layout({ children }) {
               </p>
             </div>
           </div>
+
           <button
             onClick={() => setShowChangePasswordModal(true)}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#34495E] hover:bg-[#3d5266] text-slate-300 hover:text-white rounded-lg text-sm font-medium transition-all mb-2"

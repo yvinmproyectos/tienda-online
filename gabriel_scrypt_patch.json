@@ -1,0 +1,10 @@
+{
+    "users": [
+        {
+            "localId": "wppQgJ8EZEW5SCBt63M47AG6WNk2",
+            "email": "gabriel@sistema.local",
+            "passwordHash": "YESbfA+YOgNhwv0rLmLNj+5R1t1FbOTj4aNsr+era2h2xUu7l+fX7MfquFjQiTgKK0kmyFGZ2PRJyQWuHAVD5Q==",
+            "salt": "Dsrgv1KhSawMOQ=="
+        }
+    ]
+}

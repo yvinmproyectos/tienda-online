@@ -30,7 +30,9 @@ export const userService = {
     createUser: async (username, password, role, displayName) => {
         let secondaryApp;
         try {
-            const email = usernameToEmail(username);
+            // Generate a unique internal email to avoid collisions if a user with the same name was deleted/re-created
+            const timestamp = Date.now();
+            const internalEmail = `${username}_${timestamp}@sistema.local`;
 
             // Initialize a secondary Firebase Admin app to create user without logging out current user
             const secondaryAppName = `secondaryApp-${Date.now()}`;
@@ -38,12 +40,13 @@ export const userService = {
             const secondaryAuth = getAuth(secondaryApp);
 
             // Create user in Firebase Auth using secondary app
-            const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+            const userCredential = await createUserWithEmailAndPassword(secondaryAuth, internalEmail, password);
             const uid = userCredential.user.uid;
 
             // Store user profile in Firestore (using main app db)
             await setDoc(doc(db, USERS_COLLECTION, uid), {
                 username,
+                email: internalEmail, // Store the internal email for login lookup
                 displayName: displayName || username,
                 role, // 'admin' or 'cashier'
                 isActive: true,
@@ -118,44 +121,36 @@ export const userService = {
 
     /**
      * Reset user password (admin only)
-     * Creates a temporary password that the user should change on next login
+     * Note: In a client-only Firebase app, administrators cannot directly change
+     * another user's authentication credentials.
+     * This function sets a "Reset Required" flag and stores a notification.
+     * In a real production app with a backend, this would call a Cloud Function
+     * which has Admin SDK privileges to actually update the Auth password.
      */
     resetUserPassword: async (uid, newPassword) => {
-        let secondaryApp;
         try {
-            // Get user data to get their email
+            // Get user data to verify existence
             const userDoc = await getDoc(doc(db, USERS_COLLECTION, uid));
             if (!userDoc.exists()) {
                 throw new Error('Usuario no encontrado');
             }
 
             const userData = userDoc.data();
-            const email = usernameToEmail(userData.username);
+            console.log(`Reset requested for ${userData.username}. Password to be set: ${newPassword}`);
 
-            // Initialize secondary app
-            const secondaryAppName = `secondaryApp-${Date.now()}`;
-            secondaryApp = initializeApp(firebaseConfig, secondaryAppName);
-            const secondaryAuth = getAuth(secondaryApp);
-
-            // Sign in as the user to change their password
-            // Note: This is a workaround since we can't directly change another user's password
-            // The admin will generate a temporary password
-
-            // Update user doc to mark password as temporary
+            // Update user doc to mark password change as pending
+            // Since we can't change Auth password here, we notify the admin
+            // that a manual reset (Delete/Recreate) or a Cloud Function is required.
             await updateDoc(doc(db, USERS_COLLECTION, uid), {
                 passwordResetRequired: true,
+                tempPasswordValue: newPassword, // Store temporarily so admin can see/confirm
                 updatedAt: Timestamp.now()
             });
 
-            // Return the temporary password to show to admin
             return newPassword;
         } catch (error) {
             console.error('Error resetting password:', error);
             throw error;
-        } finally {
-            if (secondaryApp) {
-                await deleteApp(secondaryApp);
-            }
         }
     },
 

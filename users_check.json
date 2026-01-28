@@ -1,0 +1,127 @@
+{"users": [
+{
+  "localId": "1UxaCyDtgHXQyucxyWexkhR2puk2",
+  "email": "pepe@sistema.local",
+  "emailVerified": false,
+  "passwordHash": "QKmZvvFztB+rMxWsxCdv70VW3GsOxnX5NWZq5C7mhz9MSelTsqUh/njaXCG1klmng2RavW5c5PqltWcwuukMoA==",
+  "salt": "MweYZ0xIpF/vSQ==",
+  "lastSignedInAt": "1766503793510",
+  "createdAt": "1765563209555",
+  "providerUserInfo": []
+},
+{
+  "localId": "1VOOFG6QeISDcx43ffizJWTdIFn1",
+  "email": "daniela@sistema.local",
+  "emailVerified": false,
+  "passwordHash": "EoVLk+0v4wo1ciRf/26jeHtIG6YIs9SUtVf3d1h45goROsKkhwUpKzkntO+pgxvawNJZVxc073kKmaFTOYp8pg==",
+  "salt": "MuqOAyjTb3rX5g==",
+  "lastSignedInAt": "1768940347462",
+  "createdAt": "1768930857580",
+  "providerUserInfo": []
+},
+{
+  "localId": "C6u3S4eLaiOd6Z6N58hfMnkeFI53",
+  "email": "aide@sistema.local",
+  "emailVerified": false,
+  "passwordHash": "+n0+zk5BVEs8/1Y9M1JxzO2h+X6TlhXQ6KLA99KmLtygMQaqYeqBej0tQLAyrls6zSceIU70z1PKTnob4QW8uw==",
+  "salt": "eZqeiTc9pCZxRg==",
+  "lastSignedInAt": "1768930817459",
+  "createdAt": "1768930817459",
+  "providerUserInfo": []
+},
+{
+  "localId": "D4nOLh7trwYYHuOYrtOF6ElYAYr1",
+  "email": "estela@sistema.local",
+  "emailVerified": false,
+  "passwordHash": "wX4O0/pu4+wI4IQkgKJ4MNdEZDAoh38zDEcXhHPWoFS0OSYK6DHGZ5f62LDrsEpDajqgdZOWn8SaS4z6HoJP9w==",
+  "salt": "iZ1NsZaS3KSxYQ==",
+  "lastSignedInAt": "1769539448966",
+  "createdAt": "1769539448966",
+  "providerUserInfo": []
+},
+{
+  "localId": "Ibdj0cFJGMevBfTWfB16AuxFdKn1",
+  "email": "estela1@sistema.local",
+  "emailVerified": false,
+  "passwordHash": "0A+pWo/accUEodc4m7AgXu543LAOdULkWOktRo62sgEWMmg13Wc81QGTLAbMIHVMuK6TmNfHLRXloGgTwMgmQA==",
+  "salt": "UKs+4hmMPjc3Gw==",
+  "lastSignedInAt": "1769546602171",
+  "createdAt": "1769546396658",
+  "providerUserInfo": []
+},
+{
+  "localId": "RkF7OEabuseFyr5vN2XyDwl5P5I2",
+  "email": "joset@sistema.local",
+  "emailVerified": false,
+  "passwordHash": "yGClAIEuSwRXapn06GvXx/Vb7pkP6tPT8xNSF3yxg3GnAXKy3BWbEPb4IdXjMDMWIe4OD51A+KhJPeyjtlosyA==",
+  "salt": "PBPthV/iuEqYzg==",
+  "lastSignedInAt": "1765555838386",
+  "createdAt": "1765555838386",
+  "providerUserInfo": []
+},
+{
+  "localId": "X204BI7BIRUJgxkHyulvHr36XPy2",
+  "email": "brigith@sistema.local",
+  "emailVerified": false,
+  "passwordHash": "SeG4+5ySWgDCKr9Q9cInxQ2I6kLhR1i8ECtFhYQ2lVhk2o5JrGzXM/gpwf8ypjrfeY9LWTOPSaCAg6BFjaP6GQ==",
+  "salt": "NCwYwP03tv7PtQ==",
+  "lastSignedInAt": "1769449208325",
+  "createdAt": "1768930909047",
+  "providerUserInfo": []
+},
+{
+  "localId": "dMhspP44HNURvYOG364EmtwyYAp1",
+  "email": "yvinm@sistema.local",
+  "emailVerified": false,
+  "passwordHash": "d17P6eIEX20nDRL4wk5CahuoQQdyKWXGW7XM15gKu3HiL8NovZfOw8Q4Xp13m/torEGLGRA4RccrWOKt1UwJLg==",
+  "salt": "jl0LJSFW2TXg4A==",
+  "lastSignedInAt": "1765566681260",
+  "createdAt": "1765555521965",
+  "providerUserInfo": []
+},
+{
+  "localId": "elc4ZJEY0xexStqNvpBq2DVabtq1",
+  "email": "aide1@sistema.local",
+  "emailVerified": false,
+  "passwordHash": "DI00aeMscymSuIXtOYxe6jbsSIdAp204KKhA3a/jgh4zcvWqNwEXjIxzNHS/zX8VYUQCf0FPk+ysUDKLeFDOZw==",
+  "salt": "tGIJWYqwTSDAnw==",
+  "lastSignedInAt": "1769449925552",
+  "createdAt": "1768931012105",
+  "providerUserInfo": []
+},
+{
+  "localId": "oVS59XnswTVF41vxhXzdVkNvvJs2",
+  "email": "yvinm.conecta@gmail.com",
+  "emailVerified": true,
+  "displayName": "Yvin Melgar",
+  "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocI9V1gvf-EJOeGccavaq234qoPxykv2KZ_4oSaCGmltERzjRQ=s96-c",
+  "lastSignedInAt": "1765484408737",
+  "createdAt": "1765300453370",
+  "providerUserInfo": [
+    {
+      "providerId": "google.com",
+      "rawId": "113453164431935763836",
+      "email": "yvinm.conecta@gmail.com",
+      "displayName": "Yvin Melgar",
+      "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocI9V1gvf-EJOeGccavaq234qoPxykv2KZ_4oSaCGmltERzjRQ=s96-c"
+    }
+  ]
+},
+{
+  "localId": "wppQgJ8EZEW5SCBt63M47AG6WNk2",
+  "email": "gabriel@sistema.local",
+  "emailVerified": false,
+  "createdAt": "1769547350137",
+  "disabled": false,
+  "providerUserInfo": []
+},
+{
+  "localId": "wsX4qyrOOyTYTQhtWWUwQyb29fA3",
+  "email": "admin@sistema.local",
+  "emailVerified": false,
+  "passwordHash": "YESbfA+YOgNhwv0rLmLNj+5R1t1FbOTj4aNsr+era2h2xUu7l+fX7MfquFjQiTgKK0kmyFGZ2PRJyQWuHAVD5Q==",
+  "salt": "Dsrgv1KhSawMOQ==",
+  "lastSignedInAt": "1769545351504",
+  "createdAt": "1765486080351",
+  "providerUserInfo": []
+}]}

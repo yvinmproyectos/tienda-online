@@ -1,0 +1,10 @@
+{
+    "users": [
+        {
+            "localId": "mJp8XYkFGifEJ54sWB8U0mu2Ckm2",
+            "email": "yvin@sistema.local",
+            "passwordHash": "Bqpntmp9s1lKtNmQF695j8PUk8y2MAYc9hw54YHSendTwmv3Ot893VinYb4XGEnGuWwMhlVarOj8GYptg4Z+sg==",
+            "salt": "e2srH70Xbrb9lQ=="
+        }
+    ]
+}

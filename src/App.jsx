@@ -12,13 +12,22 @@ import InventoryPage from './pages/InventoryPage';
 import SettingsPage from './pages/SettingsPage';
 import DiscountsPage from './pages/DiscountsPage';
 import UsersPage from './pages/UsersPage';
+import SuperUserPage from './pages/SuperUserPage';
 
 // Protected Route Component
-function ProtectedRoute({ children, adminOnly = false }) {
+function ProtectedRoute({ children, adminOnly = false, superUserOnly = false }) {
   const { currentUser, userProfile } = useAuth();
 
   if (!currentUser) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (superUserOnly) {
+    const isSuperUser = userProfile?.username?.toLowerCase() === 'admin' ||
+      userProfile?.username?.toLowerCase() === 'admin@sistema.local';
+    if (!isSuperUser) {
+      return <Navigate to="/" replace />;
+    }
   }
 
   if (adminOnly && userProfile?.role !== 'admin') {
@@ -103,6 +112,14 @@ function AppRoutes() {
           </Layout>
         </ProtectedRoute>
       } />
+      <Route path="/superuser" element={
+        <ProtectedRoute superUserOnly>
+          <Layout>
+            <SuperUserPage />
+          </Layout>
+        </ProtectedRoute>
+      } />
+
 
       {/* Redirect to POS by default */}
       <Route path="*" element={<Navigate to="/pos" replace />} />

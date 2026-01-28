@@ -5,7 +5,7 @@ import {
     signOut,
     onAuthStateChanged
 } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 const AuthContext = createContext();
 
@@ -28,7 +28,28 @@ export const AuthProvider = ({ children }) => {
     // Login with username and password
     const login = async (username, password) => {
         try {
-            const email = usernameToEmail(username);
+            let email;
+
+            try {
+                // Find the correct Auth Email for this username
+                const usersRef = collection(db, 'users');
+                const q = query(usersRef, where('username', '==', username), where('isActive', '==', true));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    // If found in Firestore, use the stored email (which includes the unique timestamp for newer users)
+                    email = querySnapshot.docs[0].data().email || usernameToEmail(username);
+                } else {
+                    // Fallback for edge cases or legacy admin creation logic
+                    email = usernameToEmail(username);
+                }
+            } catch (firestoreError) {
+                // If Firestore query fails (e.g., permission denied for unauthenticated users),
+                // fall back to legacy email format
+                console.warn('Firestore query failed, using legacy email format:', firestoreError);
+                email = usernameToEmail(username);
+            }
+
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
             // Load user profile from Firestore

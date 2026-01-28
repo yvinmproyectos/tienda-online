@@ -11,7 +11,9 @@ import {
     X,
     AlertCircle,
     Shield,
-    User
+    User,
+    Eye,
+    EyeOff
 } from 'lucide-react';
 import { userService } from '../services/userService';
 
@@ -28,6 +30,7 @@ export default function UsersPage() {
     const [resetUser, setResetUser] = useState(null);
     const [tempPassword, setTempPassword] = useState('');
 
+    const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
         displayName: '',
@@ -65,6 +68,7 @@ export default function UsersPage() {
             });
         } else {
             setEditingUser(null);
+            setShowPassword(false);
             setFormData({
                 username: '',
                 displayName: '',
@@ -106,7 +110,20 @@ export default function UsersPage() {
                 });
                 setSuccess('Usuario actualizado correctamente');
             } else {
-                // Create new user
+                // Collision check for NEW user
+                const exists = await userService.usernameExists(formData.username);
+                if (exists) {
+                    setError('El nombre de usuario ya existe y está activo en el sistema. Si desea usar el mismo nombre para un usuario eliminado, simplemente proceda (ahora el sistema lo permite).');
+                    // Wait, if it exists and IS ACTIVE, we should stop.
+                    // If it was deleted, exists should be false.
+                }
+
+                if (exists) {
+                    setError('El nombre de usuario ya está en uso por un usuario activo.');
+                    setIsSubmitting(false);
+                    return;
+                }
+
                 await userService.createUser(
                     formData.username,
                     formData.password,
@@ -163,15 +180,16 @@ export default function UsersPage() {
 
         try {
             await userService.resetUserPassword(resetUser.uid, tempPassword);
-            setSuccess(`Contraseña restablecida. Nueva contraseña: ${tempPassword}`);
+            // We set a more descriptive success message
+            setSuccess(`Solicitud de restablecimiento enviada. La contraseña temporal será: ${tempPassword}. El usuario deberá intentar ingresar con ella.`);
             setShowResetModal(false);
             setResetUser(null);
             setTempPassword('');
 
-            setTimeout(() => setSuccess(''), 10000);
+            setTimeout(() => setSuccess(''), 15000);
         } catch (error) {
             console.error('Error resetting password:', error);
-            setError('Error al restablecer contraseña');
+            setError('Error al solicitar restablecimiento de contraseña');
         } finally {
             setIsSubmitting(false);
         }
@@ -283,8 +301,8 @@ export default function UsersPage() {
                                         <td className="px-6 py-4 text-slate-600">{user.displayName || '-'}</td>
                                         <td className="px-6 py-4">
                                             <span className={`px-3 py-1 rounded-full text-xs font-bold ${user.role === 'admin'
-                                                    ? 'bg-purple-100 text-purple-700'
-                                                    : 'bg-blue-100 text-blue-700'
+                                                ? 'bg-purple-100 text-purple-700'
+                                                : 'bg-blue-100 text-blue-700'
                                                 }`}>
                                                 {user.role === 'admin' ? 'Administrador' : 'Cajero'}
                                             </span>
@@ -389,27 +407,45 @@ export default function UsersPage() {
                                         <label className="block text-sm font-bold text-slate-700 mb-2">
                                             Contraseña
                                         </label>
-                                        <input
-                                            type="password"
-                                            required
-                                            minLength={6}
-                                            className="w-full px-4 py-3 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
-                                            value={formData.password}
-                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                        />
+                                        <div className="relative">
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                required
+                                                minLength={6}
+                                                className="w-full px-4 py-3 pr-12 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                                                value={formData.password}
+                                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                                            >
+                                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div>
                                         <label className="block text-sm font-bold text-slate-700 mb-2">
                                             Confirmar Contraseña
                                         </label>
-                                        <input
-                                            type="password"
-                                            required
-                                            className="w-full px-4 py-3 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
-                                            value={formData.confirmPassword}
-                                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                        />
+                                        <div className="relative">
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                required
+                                                className="w-full px-4 py-3 pr-12 border border-slate-300 rounded-lg outline-none focus:border-blue-500"
+                                                value={formData.confirmPassword}
+                                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                                            >
+                                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                            </button>
+                                        </div>
                                     </div>
                                 </>
                             )}
@@ -451,58 +487,41 @@ export default function UsersPage() {
                         </div>
 
                         <div className="p-6 space-y-4">
-                            <p className="text-slate-600">
-                                Genera una contraseña temporal para <strong>{resetUser?.username}</strong>
-                            </p>
-
-                            {error && (
-                                <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2 text-red-700 text-sm">
-                                    <AlertCircle size={16} />
-                                    <span>{error}</span>
-                                </div>
-                            )}
-
-                            <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-2">
-                                    Nueva Contraseña Temporal
-                                </label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        className="flex-1 px-4 py-3 border border-slate-300 rounded-lg outline-none focus:border-blue-500 font-mono"
-                                        value={tempPassword}
-                                        onChange={(e) => setTempPassword(e.target.value)}
-                                        placeholder="Mínimo 6 caracteres"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={generatePassword}
-                                        className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold transition-colors"
-                                    >
-                                        Generar
-                                    </button>
+                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-900">
+                                <h3 className="font-bold flex items-center gap-2 mb-2 text-amber-900">
+                                    <AlertCircle size={18} />
+                                    Procedimiento de Restablecimiento
+                                </h3>
+                                <p className="mb-3">
+                                    Debido a las medidas de seguridad del sistema, no es posible cambiar la contraseña de otro usuario directamente.
+                                </p>
+                                <div className="bg-white/50 p-3 rounded border border-amber-200">
+                                    <p className="font-bold mb-1">Para cambiar la contraseña de {resetUser?.username}:</p>
+                                    <ol className="list-decimal ml-5 space-y-1">
+                                        <li>Cierre esta ventana.</li>
+                                        <li>Elimine el usuario <strong>{resetUser?.username}</strong> usando el botón rojo <Trash2 size={14} className="inline" />.</li>
+                                        <li>Cree un <strong>Nuevo Usuario</strong> con el mismo nombre (<strong>{resetUser?.username}</strong>) y la nueva contraseña.</li>
+                                    </ol>
                                 </div>
                             </div>
 
-                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
-                                <AlertCircle size={16} className="inline mr-2" />
-                                Comparte esta contraseña con el usuario de forma segura.
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-900 flex items-start gap-3">
+                                <Shield size={32} className="shrink-0 text-blue-600 mt-1" />
+                                <div>
+                                    <h4 className="font-bold mb-1 text-blue-900">¡Sus datos están seguros!</h4>
+                                    <p>
+                                        El historial de ventas y movimientos está vinculado al <strong>nombre de usuario</strong>.
+                                        Al volver a crear el usuario con el mismo nombre, recuperará todo su historial automáticamente.
+                                    </p>
+                                </div>
                             </div>
 
-                            <div className="flex gap-3 pt-4">
+                            <div className="pt-4">
                                 <button
                                     onClick={() => setShowResetModal(false)}
-                                    className="flex-1 px-4 py-3 border border-slate-300 rounded-lg text-slate-700 font-bold hover:bg-slate-50"
-                                    disabled={isSubmitting}
+                                    className="w-full px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold transition-colors"
                                 >
-                                    Cancelar
-                                </button>
-                                <button
-                                    onClick={confirmResetPassword}
-                                    className="flex-1 px-4 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold disabled:opacity-50"
-                                    disabled={isSubmitting}
-                                >
-                                    {isSubmitting ? 'Restableciendo...' : 'Restablecer'}
+                                    Entendido, cerrar ventana
                                 </button>
                             </div>
                         </div>

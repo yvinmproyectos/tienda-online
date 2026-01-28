@@ -22,6 +22,10 @@ import {
     RefreshCw,
     Ticket,
     Shield,
+    Eye,
+    EyeOff,
+    Receipt,
+    WifiOff,
     Edit2,
     ChevronLeft
 } from 'lucide-react';
@@ -79,6 +83,7 @@ export default function POSPage() {
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [authPassword, setAuthPassword] = useState('');
     const [authError, setAuthError] = useState('');
+    const [showAuthPassword, setShowAuthPassword] = useState(false);
     const [authPurpose, setAuthPurpose] = useState('DISCOUNT'); // 'DISCOUNT' | 'VOID'
     const [tempVoidSale, setTempVoidSale] = useState(null);
 
@@ -637,6 +642,7 @@ export default function POSPage() {
                 changeBs: changeBs,
                 changeUsd: changeBs / 6.96,
                 sellerName: sellerDisplayName,
+                username: userProfile?.username,
                 userId: user.uid
             };
 
@@ -1580,14 +1586,23 @@ export default function POSPage() {
                             <form onSubmit={handleAuthSubmit}>
                                 <div className="mb-4">
                                     <label className="block text-xs font-bold text-slate-700 mb-1">Contraseña</label>
-                                    <input
-                                        type="password"
-                                        autoFocus
-                                        className="w-full border border-slate-300 rounded-lg p-2 text-sm outline-none focus:border-blue-500"
-                                        placeholder="Ingrese contraseña..."
-                                        value={authPassword}
-                                        onChange={(e) => setAuthPassword(e.target.value)}
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type={showAuthPassword ? "text" : "password"}
+                                            autoFocus
+                                            className="w-full border border-slate-300 rounded-lg p-2 pr-10 text-sm outline-none focus:border-blue-500"
+                                            placeholder="Ingrese contraseña..."
+                                            value={authPassword}
+                                            onChange={(e) => setAuthPassword(e.target.value)}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowAuthPassword(!showAuthPassword)}
+                                            className="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                                        >
+                                            {showAuthPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
                                     {authError && <p className="text-red-500 text-xs mt-1">{authError}</p>}
                                 </div>
 
