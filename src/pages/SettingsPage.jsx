@@ -3,6 +3,8 @@ import { Settings, DollarSign, Save, Key, Store, Eye, EyeOff } from 'lucide-reac
 import { settingsService } from '../services/settingsService';
 
 import { PageHeader } from '../components/PageHeader';
+import { useAuth } from '../contexts/AuthContext';
+import ChangePasswordModal from '../components/ChangePasswordModal';
 
 export default function SettingsPage() {
     // Settings state
@@ -17,6 +19,8 @@ export default function SettingsPage() {
         discountAuthThreshold: '20'
     });
     const [showDiscountPassword, setShowDiscountPassword] = useState(false);
+    const { userProfile } = useAuth();
+    const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 
     const [logoFile, setLogoFile] = useState(null);
     const [message, setMessage] = useState('');
@@ -124,6 +128,16 @@ export default function SettingsPage() {
                 title="Configuración"
                 subtitle="Ajustes generales del sistema"
                 icon={Settings}
+                action={
+                    <button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 disabled:opacity-50"
+                    >
+                        <Save size={20} />
+                        {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+                    </button>
+                }
             />
 
             {message && (
@@ -294,7 +308,41 @@ export default function SettingsPage() {
                 </div>
 
 
+                {/* System Password Change - Admin Only */}
+                {userProfile?.role === 'admin' && (
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                            <Key className="text-slate-700" size={24} />
+                            <div>
+                                <h3 className="font-bold text-slate-900">Seguridad de Acceso</h3>
+                                <p className="text-sm text-slate-500">Gestión de credenciales de ingreso al sistema</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div>
+                                <h4 className="font-bold text-slate-800 text-sm">Cambio de Contraseña de Sistema</h4>
+                                <p className="text-xs text-slate-500 mt-1 max-w-lg">
+                                    Actualiza tu contraseña personal para acceder a la plataforma.
+                                    Se recomienda usar una contraseña segura y cambiarla periódicamente.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowChangePasswordModal(true)}
+                                className="whitespace-nowrap px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-bold text-sm flex items-center gap-2 transition-colors"
+                            >
+                                <Key size={16} />
+                                Cambiar Contraseña
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
+
+            <ChangePasswordModal
+                isOpen={showChangePasswordModal}
+                onClose={() => setShowChangePasswordModal(false)}
+            />
         </div>
     );
 }

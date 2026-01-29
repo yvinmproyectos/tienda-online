@@ -60,8 +60,8 @@ export default function POSPage() {
     const [cart, setCart] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [amountTendered, setAmountTendered] = useState('');
-    const [customerName, setCustomerName] = useState('');
-    const [customerNit, setCustomerNit] = useState('');
+    const [customerName, setCustomerName] = useState('SIN NOMBRE');
+    const [customerNit, setCustomerNit] = useState('0');
     const [isFacebookSale, setIsFacebookSale] = useState(false);
     const [discountBs, setDiscountBs] = useState('');
     const [discountAuthorizedBy, setDiscountAuthorizedBy] = useState('');
@@ -633,7 +633,7 @@ export default function POSPage() {
                 totalUsd: cartTotals.totalUsd,
                 discountBs: cartTotals.discount,
                 discountAuthorizedBy: discountAuthorizedBy,
-                customerName: customerName || 'Sin Nombre',
+                customerName: customerName || 'SIN NOMBRE',
                 customerNit: customerNit || '0',
                 isFacebookSale: isFacebookSale,
                 amountBs: paymentMethod === 'MIXTO' ? tenderedBs : (currency === 'BS' ? (parseFloat(amountTendered) || cartTotals.totalBs) : 0),
@@ -663,8 +663,8 @@ export default function POSPage() {
             // Immediate UI cleanup
             setCart([]);
             setAmountTendered('');
-            setCustomerName('');
-            setCustomerNit('');
+            setCustomerName('SIN NOMBRE');
+            setCustomerNit('0');
             setIsFacebookSale(false);
             setDiscountBs('');
             setDiscountAuthorizedBy('');
@@ -1555,8 +1555,8 @@ export default function POSPage() {
                                         // Clear Cart and Payment Fields
                                         setCart([]);
                                         setAmountTendered('');
-                                        setCustomerName('');
-                                        setCustomerNit('');
+                                        setCustomerName('SIN NOMBRE');
+                                        setCustomerNit('0');
                                         setDiscountBs('');
                                         setDiscountAuthorizedBy(null);
                                     }}

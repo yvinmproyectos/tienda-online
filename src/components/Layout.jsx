@@ -20,8 +20,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
 import { settingsService } from '../services/settingsService';
-import ChangePasswordModal from './ChangePasswordModal';
 import OfflineAlert from './OfflineAlert';
+import ymtLogo from '../assets/ymt-logo.png';
 
 export default function Layout({ children }) {
   const { userProfile, logout } = useAuth();
@@ -49,7 +49,6 @@ export default function Layout({ children }) {
 
   /* Logout Warning State */
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 
   const handleLogout = async () => {
     // If POS has changes, show custom modal instead of browser confirm
@@ -99,7 +98,7 @@ export default function Layout({ children }) {
       {/* Sidebar for Desktop */}
       <aside className="hidden md:flex md:flex-col w-64 bg-[#2C3E50] border-r border-[#34495E] shrink-0">
         {/* Header */}
-        <div className="p-6 border-b border-[#34495E]">
+        <div className="p-4 border-b border-[#34495E]">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#5DADE2] rounded-xl flex items-center justify-center overflow-hidden shrink-0">
               {storeSettings?.logoBase64 ? (
@@ -118,7 +117,7 @@ export default function Layout({ children }) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto no-scrollbar">
           {navigation.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.href;
@@ -158,13 +157,7 @@ export default function Layout({ children }) {
             </div>
           </div>
 
-          <button
-            onClick={() => setShowChangePasswordModal(true)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#34495E] hover:bg-[#3d5266] text-slate-300 hover:text-white rounded-lg text-sm font-medium transition-all mb-2"
-          >
-            <Key size={18} />
-            <span>Cambiar Contraseña</span>
-          </button>
+
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#233545] hover:bg-red-600/90 text-slate-300 hover:text-white rounded-lg text-sm font-bold transition-all group"
@@ -172,6 +165,16 @@ export default function Layout({ children }) {
             <LogOut size={18} className="text-slate-400 group-hover:text-white transition-colors" />
             <span>Cerrar Sesión</span>
           </button>
+        </div>
+
+        {/* YMT Logo Footer */}
+        <div className="p-4 pt-0 flex justify-center pb-4">
+          <img
+            src={ymtLogo}
+            alt="YMT Soporte y Tecnología"
+            className="w-24 opacity-60 hover:opacity-100 hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all duration-300 cursor-pointer"
+            title="Soporte y Tecnología"
+          />
         </div>
       </aside>
 
@@ -263,13 +266,7 @@ export default function Layout({ children }) {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowChangePasswordModal(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#34495E] hover:bg-[#3d5266] text-slate-300 hover:text-white rounded-lg text-sm font-medium transition-all mb-2"
-              >
-                <Key size={18} />
-                <span>Cambiar Contraseña</span>
-              </button>
+
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#233545] hover:bg-red-600/90 text-slate-300 hover:text-white rounded-lg text-sm font-medium transition-all group"
@@ -322,10 +319,7 @@ export default function Layout({ children }) {
         </div>
       )}
 
-      <ChangePasswordModal
-        isOpen={showChangePasswordModal}
-        onClose={() => setShowChangePasswordModal(false)}
-      />
+
 
     </div>
   );
