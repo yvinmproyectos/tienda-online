@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Package, Plus, Search, Filter, Pencil, Trash2, X, ChevronDown, ChevronRight, WifiOff } from 'lucide-react';
+import { Package, Plus, Search, Filter, Pencil, Trash2, X, ChevronDown, ChevronRight, WifiOff, Calculator } from 'lucide-react';
 import { PageHeader } from '../components/PageHeader';
 import { useInventoryStore } from '../store/inventoryStore';
 import StockEntryModal from '../components/StockEntryModal';
@@ -13,14 +13,19 @@ export default function InventoryPage() {
     const [productToDelete, setProductToDelete] = useState(null);
     const [expandedGroups, setExpandedGroups] = useState(new Set());
     const [bulkPriceGroup, setBulkPriceGroup] = useState(null);
-    const [newBulkPrice, setNewBulkPrice] = useState('');
+    const [bulkEditData, setBulkEditData] = useState({
+        costDozen: '',
+        quantity: '1',
+        costUnit: '',
+        price: ''
+    });
 
     const handleSaveProduct = (productData) => {
         try {
             if (Array.isArray(productData)) {
                 // If it's an array, it's multi-save (works for both new and edit additions)
                 addProductsBatch(productData);
-            } else if (editingProduct) {
+            } else if (editingProduct && editingProduct.id) {
                 // Single product update
                 updateProduct(editingProduct.id, productData);
             } else {
@@ -73,27 +78,52 @@ export default function InventoryPage() {
 
     const handleBulkPriceEdit = (group) => {
         setBulkPriceGroup(group);
-        setNewBulkPrice(group.price || '');
+        setBulkEditData({
+            costDozen: group.variants[0]?.costDozen || '',
+            quantity: '1',
+            costUnit: group.variants[0]?.costUnit || '',
+            price: group.price || ''
+        });
     };
 
     const handleBulkPriceUpdate = async () => {
-        if (!bulkPriceGroup || !newBulkPrice) return;
+        if (!bulkPriceGroup || !bulkEditData.price) return;
 
-        const price = parseFloat(newBulkPrice);
+        const price = parseFloat(bulkEditData.price);
         if (isNaN(price) || price <= 0) {
-            alert('Por favor ingrese un precio válido');
+            alert('Por favor ingrese un precio de venta válido');
             return;
         }
 
         try {
-            const count = await updateProductGroupPrice(bulkPriceGroup.brand, bulkPriceGroup.model, price);
+            const updateData = {
+                price: price,
+                costDozen: parseFloat(bulkEditData.costDozen) || 0,
+                costUnit: parseFloat(bulkEditData.costUnit) || 0,
+                updatedAt: new Date()
+            };
+
+            await updateProductGroupPrice(bulkPriceGroup.brand, bulkPriceGroup.model, updateData);
             setBulkPriceGroup(null);
-            setNewBulkPrice('');
         } catch (error) {
             console.error('Error updating bulk price:', error);
-            alert('Error al actualizar el precio: ' + error.message);
+            alert('Error al actualizar: ' + error.message);
         }
     };
+
+    // Cost calculation logic for Bulk Edit
+    useEffect(() => {
+        if (bulkPriceGroup) {
+            const dozen = parseFloat(bulkEditData.costDozen) || 0;
+            const qty = parseInt(bulkEditData.quantity) || 1;
+            const unit = dozen > 0 ? (dozen / 12) : 0;
+
+            setBulkEditData(prev => ({
+                ...prev,
+                costUnit: unit > 0 ? unit.toFixed(2) : ''
+            }));
+        }
+    }, [bulkEditData.costDozen, bulkEditData.quantity, !!bulkPriceGroup]);
 
     const groupedProducts = React.useMemo(() => {
         const filtered = (products || []).filter(p =>
@@ -502,12 +532,15 @@ export default function InventoryPage() {
                 </div>
             )}
 
-            {/* Bulk Price Edit Modal */}
+            {/* Bulk Price Edit Modal - IMPROVED WITH COST CALCULATOR */}
             {bulkPriceGroup && (
                 <div className="fixed inset-0 bg-black/50 z-[70] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 animate-in fade-in zoom-in duration-200">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-bold text-slate-900">Editar Precio Global</h3>
+                            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                <Calculator className="text-blue-600" size={20} />
+                                Editar Precio Global y Costos
+                            </h3>
                             <button
                                 onClick={() => setBulkPriceGroup(null)}
                                 className="text-slate-400 hover:text-slate-600"
@@ -516,27 +549,86 @@ export default function InventoryPage() {
                             </button>
                         </div>
 
-                        <div className="mb-4">
-                            <p className="text-sm text-slate-600 mb-2">
-                                <span className="font-semibold">{bulkPriceGroup.brand}</span> - {bulkPriceGroup.model}
-                            </p>
-                            <p className="text-xs text-slate-500 mb-4">
-                                Se actualizarán <span className="font-bold text-emerald-600">{bulkPriceGroup.variants.length} tallas</span>
-                            </p>
+                        <div className="mb-6">
+                            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 mb-6">
+                                <p className="text-sm text-slate-600">
+                                    <span className="font-bold text-slate-900">{bulkPriceGroup.brand}</span> - {bulkPriceGroup.model}
+                                </p>
+                                <p className="text-xs text-slate-500 mt-1">
+                                    Se actualizarán <span className="font-bold text-emerald-600">{bulkPriceGroup.variants.length} tallas</span> existentes.
+                                </p>
+                            </div>
 
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Nuevo Precio (Bs)
-                            </label>
-                            <input
-                                type="number"
-                                value={newBulkPrice}
-                                onChange={(e) => setNewBulkPrice(e.target.value)}
-                                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                                placeholder="Ingrese el nuevo precio"
-                                step="0.01"
-                                min="0"
-                                autoFocus
-                            />
+                            {/* COST CALCULATOR SECTION (Mirroring StockEntryModal) */}
+                            <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-4 mb-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Costo Docena (Bs)</label>
+                                        <input
+                                            type="number"
+                                            value={bulkEditData.costDozen}
+                                            onChange={(e) => setBulkEditData(prev => ({ ...prev, costDozen: e.target.value }))}
+                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium"
+                                            placeholder="0.00"
+                                            step="0.01"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Unidades (Pares)</label>
+                                        <input
+                                            type="number"
+                                            value={bulkEditData.quantity}
+                                            onChange={(e) => setBulkEditData(prev => ({ ...prev, quantity: e.target.value }))}
+                                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium"
+                                            placeholder="1"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Costo Unitario (Bs)</label>
+                                        <input
+                                            type="text"
+                                            readOnly
+                                            value={bulkEditData.costUnit}
+                                            className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 text-sm font-bold"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Costo Total (Bs)</label>
+                                        <input
+                                            type="text"
+                                            readOnly
+                                            value={(parseFloat(bulkEditData.costUnit) * parseInt(bulkEditData.quantity || 0)).toFixed(2)}
+                                            className="w-full px-3 py-2 bg-blue-100 border border-blue-200 rounded-lg text-blue-700 text-sm font-bold"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* SALES PRICE SECTION */}
+                            <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+                                <label className="block text-xs font-bold text-emerald-700 uppercase mb-1.5">Precio de Venta (Bs)</label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600 font-bold">Bs</span>
+                                    <input
+                                        type="number"
+                                        value={bulkEditData.price}
+                                        onChange={(e) => setBulkEditData(prev => ({ ...prev, price: e.target.value }))}
+                                        className="w-full pl-10 pr-4 py-3 bg-white border border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-lg font-bold text-emerald-600"
+                                        placeholder="0.00"
+                                        step="0.01"
+                                        min="0"
+                                        autoFocus
+                                    />
+                                </div>
+                                <p className="text-[10px] text-emerald-600 mt-2 italic font-medium">
+                                    * Este precio se aplicará a todas las tallas de este modelo.
+                                </p>
+                            </div>
                         </div>
 
                         <div className="flex gap-3">
@@ -548,7 +640,7 @@ export default function InventoryPage() {
                             </button>
                             <button
                                 onClick={handleBulkPriceUpdate}
-                                className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+                                className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200"
                             >
                                 Actualizar Todo
                             </button>

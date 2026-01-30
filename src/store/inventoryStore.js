@@ -349,8 +349,8 @@ export const useInventoryStore = create((set, get) => ({
         }
     },
 
-    // Update price for all variants of a product group (same brand + model)
-    updateProductGroupPrice: async (brand, model, newPrice) => {
+    // Update price and costs for all variants of a product group (same brand + model)
+    updateProductGroupPrice: async (brand, model, updateData) => {
         const { products } = get();
 
         // Find all variants that match this brand + model
@@ -363,13 +363,13 @@ export const useInventoryStore = create((set, get) => ({
             throw new Error('No se encontraron productos para actualizar');
         }
 
-        console.log(`[Store] Updating price for ${variantsToUpdate.length} variants to Bs ${newPrice}`);
+        console.log(`[Store] Updating data for ${variantsToUpdate.length} variants:`, updateData);
 
         // Optimistic update
         const updatedProducts = products.map(p => {
             if (p.brand?.toLowerCase() === brand?.toLowerCase() &&
                 p.model?.toLowerCase() === model?.toLowerCase()) {
-                return { ...p, price: newPrice };
+                return { ...p, ...updateData, updatedAt: Timestamp.now() };
             }
             return p;
         });
@@ -383,21 +383,21 @@ export const useInventoryStore = create((set, get) => ({
             variantsToUpdate.forEach(variant => {
                 const productRef = doc(db, COLLECTION_NAME, variant.id);
                 batch.update(productRef, {
-                    price: newPrice,
+                    ...updateData,
                     updatedAt: Timestamp.now()
                 });
             });
 
             // Non-blocking commit
             batch.commit().catch(err => {
-                console.error("Async batch price update error:", err);
+                console.error("Async batch update error:", err);
                 // Rollback on error
                 set({ products });
             });
 
             return variantsToUpdate.length;
         } catch (error) {
-            console.error("Error updating group price:", error);
+            console.error("Error updating group data:", error);
             // Rollback
             set({ products });
             throw error;
